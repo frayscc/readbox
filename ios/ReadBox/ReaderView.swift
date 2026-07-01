@@ -42,6 +42,9 @@ struct ReaderView: View {
         }
         .navigationTitle("Reader")
         .navigationBarTitleDisplayMode(.inline)
+        .task {
+            await loadDetail()
+        }
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
@@ -62,6 +65,14 @@ struct ReaderView: View {
                     Image(systemName: "trash")
                 }
             }
+        }
+    }
+
+    private func loadDetail() async {
+        do {
+            item = try await client.getItem(id: item.id)
+        } catch {
+            message = error.localizedDescription
         }
     }
 

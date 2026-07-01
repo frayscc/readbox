@@ -47,6 +47,10 @@ final class ReadBoxAPIClient {
         )
     }
 
+    func getItem(id: Int) async throws -> ReadBoxItem {
+        try await request(endpoint(path: "/api/items/\(id)"), method: "GET")
+    }
+
     func updateItem(
         id: Int,
         status: ItemStatus? = nil,

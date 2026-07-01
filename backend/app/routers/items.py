@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 
 from .. import crud
 from ..auth import require_token
@@ -13,8 +13,10 @@ router = APIRouter(prefix="/api", dependencies=[Depends(require_token)])
 
 
 @router.post("/items", response_model=Item)
-def create_item(payload: ItemCreate) -> dict:
-    return crud.create_item(payload)
+def create_item(payload: ItemCreate, background_tasks: BackgroundTasks) -> dict:
+    item = crud.create_item(payload)
+    background_tasks.add_task(crud.extract_item_content, item["id"])
+    return item
 
 
 @router.get("/items", response_model=ItemListResponse)

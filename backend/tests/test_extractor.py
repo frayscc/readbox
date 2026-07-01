@@ -19,6 +19,16 @@ def test_decode_html_handles_gbk_meta() -> None:
     assert "中文标题" in decoded
 
 
+def test_decode_html_handles_gbk_without_declared_charset() -> None:
+    html = "<html><head><title>中文标题</title></head><body>这是一段正文。</body></html>"
+
+    decoded = decode_html(html.encode("gbk"))
+
+    assert decoded is not None
+    assert "中文标题" in decoded
+    assert "这是一段正文" in decoded
+
+
 def test_metadata_helpers_find_common_article_fields() -> None:
     html = """
     <html>

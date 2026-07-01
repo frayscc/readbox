@@ -1,11 +1,26 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import logging
+import sqlite3
 from typing import Any
 
 from .database import db
 from .extractor import extract_article
 from .schemas import ItemCreate, ItemUpdate
+
+
+logger = logging.getLogger(__name__)
+SUMMARY_COLUMNS = """
+    id, url, canonical_url, title, author, site_name, excerpt, cover_url,
+    status, is_favorite, source, created_at, updated_at, read_at
+"""
+SUMMARY_COLUMNS_WITH_TABLE = """
+    items.id, items.url, items.canonical_url, items.title, items.author,
+    items.site_name, items.excerpt, items.cover_url, items.status,
+    items.is_favorite, items.source, items.created_at, items.updated_at,
+    items.read_at
+"""
 
 
 def now_iso() -> str:
@@ -19,9 +34,7 @@ def row_to_item(row: Any) -> dict[str, Any]:
 
 
 def create_item(payload: ItemCreate) -> dict[str, Any]:
-    extracted = extract_article(str(payload.url))
-    data = extracted.dict()
-    title = data.get("title") or payload.title or str(payload.url)
+    title = payload.title or str(payload.url)
     created_at = now_iso()
 
     with db() as conn:
@@ -36,6 +49,52 @@ def create_item(payload: ItemCreate) -> dict[str, Any]:
             """,
             (
                 str(payload.url),
+                None,
+                title,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                payload.source,
+                created_at,
+                created_at,
+            ),
+        )
+        row = conn.execute("SELECT * FROM items WHERE id = ?", (cur.lastrowid,)).fetchone()
+        return row_to_item(row)
+
+
+def extract_item_content(item_id: int) -> None:
+    item = get_item(item_id)
+    if not item:
+        return
+
+    url = item["url"]
+    logger.info("Starting article extraction", extra={"item_id": item_id, "url": url})
+    extracted = extract_article(url)
+    data = extracted.dict()
+    updated_at = now_iso()
+
+    title = data.get("title") or item.get("title") or url
+
+    with db() as conn:
+        conn.execute(
+            """
+            UPDATE items
+            SET canonical_url = COALESCE(?, canonical_url),
+                title = ?,
+                author = COALESCE(?, author),
+                site_name = COALESCE(?, site_name),
+                excerpt = COALESCE(?, excerpt),
+                content_html = COALESCE(?, content_html),
+                content_text = COALESCE(?, content_text),
+                cover_url = COALESCE(?, cover_url),
+                updated_at = ?
+            WHERE id = ?
+            """,
+            (
                 data.get("canonical_url"),
                 title,
                 data.get("author"),
@@ -44,13 +103,11 @@ def create_item(payload: ItemCreate) -> dict[str, Any]:
                 data.get("content_html"),
                 data.get("content_text"),
                 data.get("cover_url"),
-                payload.source,
-                created_at,
-                created_at,
+                updated_at,
+                item_id,
             ),
         )
-        row = conn.execute("SELECT * FROM items WHERE id = ?", (cur.lastrowid,)).fetchone()
-        return row_to_item(row)
+    logger.info("Finished article extraction", extra={"item_id": item_id, "url": url})
 
 
 def list_items(
@@ -73,7 +130,7 @@ def list_items(
         params.append(1 if favorite else 0)
 
     sql = f"""
-        SELECT * FROM items
+        SELECT {SUMMARY_COLUMNS} FROM items
         WHERE {" AND ".join(clauses)}
         ORDER BY created_at DESC
         LIMIT ? OFFSET ?
@@ -131,16 +188,31 @@ def soft_delete_item(item_id: int) -> dict[str, Any] | None:
 
 
 def search_items(query: str, limit: int = 30, offset: int = 0) -> list[dict[str, Any]]:
+    fts_query = sanitize_fts_query(query)
+    if not fts_query:
+        return []
+
     with db() as conn:
-        rows = conn.execute(
-            """
-            SELECT items.*
-            FROM items_fts
-            JOIN items ON items.id = items_fts.rowid
-            WHERE items_fts MATCH ? AND items.status != 'deleted'
-            ORDER BY bm25(items_fts), items.created_at DESC
-            LIMIT ? OFFSET ?
-            """,
-            (query, limit, offset),
-        ).fetchall()
+        try:
+            rows = conn.execute(
+                f"""
+                SELECT {SUMMARY_COLUMNS_WITH_TABLE}
+                FROM items_fts
+                JOIN items ON items.id = items_fts.rowid
+                WHERE items_fts MATCH ? AND items.status != 'deleted'
+                ORDER BY bm25(items_fts), items.created_at DESC
+                LIMIT ? OFFSET ?
+                """,
+                (fts_query, limit, offset),
+            ).fetchall()
+        except sqlite3.OperationalError:
+            logger.warning("Invalid FTS query", extra={"query": query, "fts_query": fts_query})
+            return []
         return [row_to_item(row) for row in rows]
+
+
+def sanitize_fts_query(query: str) -> str:
+    import re
+
+    tokens = re.findall(r"[\w\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]+", query, flags=re.UNICODE)
+    return " ".join(f'"{token.replace(chr(34), chr(34) * 2)}"' for token in tokens[:12])

@@ -77,6 +77,10 @@ export async function listItems(
   return data.items;
 }
 
+export function getItem(settings: Settings, id: number) {
+  return request<ReadBoxItem>(settings, `/api/items/${id}`);
+}
+
 export function createItem(settings: Settings, url: string, title?: string) {
   return request<ReadBoxItem>(settings, "/api/items", {
     method: "POST",

@@ -5,9 +5,11 @@ from html import escape, unescape
 from typing import Iterable
 from urllib.parse import urljoin
 from urllib.request import Request, urlopen
+import logging
 import re
 
 
+logger = logging.getLogger(__name__)
 FETCH_TIMEOUT_SECONDS = 12
 MAX_DOWNLOAD_BYTES = 8 * 1024 * 1024
 USER_AGENT = (
@@ -86,6 +88,7 @@ def extract_article(url: str) -> ArticleExtract:
             cover_url=absolute_url(url, metadata_image or find_meta(downloaded, "og:image", "twitter:image")),
         )
     except Exception:
+        logger.exception("Article extraction failed", extra={"url": url})
         return ArticleExtract()
 
 
@@ -113,8 +116,6 @@ def decode_html(raw: bytes, content_type: str = "") -> str | None:
     candidates = [
         find_charset(content_type),
         find_charset(raw[:4096].decode("ascii", errors="ignore")),
-        "utf-8",
-        "gb18030",
     ]
 
     try:
@@ -126,11 +127,15 @@ def decode_html(raw: bytes, content_type: str = "") -> str | None:
     except Exception:
         pass
 
+    candidates.extend(["utf-8", "gb18030"])
+
     for encoding in dedupe(candidates):
         if not encoding:
             continue
         try:
-            return raw.decode(encoding, errors="replace")
+            return raw.decode(encoding, errors="strict")
+        except UnicodeDecodeError:
+            continue
         except LookupError:
             continue
 

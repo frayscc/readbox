@@ -4,6 +4,7 @@ import DOMPurify from "dompurify";
 import {
   createItem,
   deleteItem,
+  getItem,
   ListMode,
   listItems,
   ReadBoxItem,
@@ -23,7 +24,13 @@ function loadSettings(): Settings {
   }
 }
 
-function SettingsView({ onSave }: { onSave: (settings: Settings) => void }) {
+function SettingsForm({
+  onSave,
+  onCancel
+}: {
+  onSave: (settings: Settings) => void;
+  onCancel?: () => void;
+}) {
   const [settings, setSettings] = useState<Settings>(loadSettings());
 
   function submit(event: FormEvent) {
@@ -33,34 +40,63 @@ function SettingsView({ onSave }: { onSave: (settings: Settings) => void }) {
   }
 
   return (
-    <main className="settings-shell">
-      <form className="settings-panel" onSubmit={submit}>
-        <h1>ReadBox</h1>
-        <label>
-          API Base URL
-          <input
-            placeholder="http://localhost:8000"
-            value={settings.apiBaseUrl}
-            onChange={(event) =>
-              setSettings({ ...settings, apiBaseUrl: event.target.value })
-            }
-            required
-          />
-        </label>
-        <label>
-          API Token
-          <input
-            type="password"
-            value={settings.apiToken}
-            onChange={(event) =>
-              setSettings({ ...settings, apiToken: event.target.value })
-            }
-            required
-          />
-        </label>
+    <form className="settings-panel" onSubmit={submit}>
+      <h1>ReadBox</h1>
+      <label>
+        API Base URL
+        <input
+          placeholder="http://localhost:8000"
+          value={settings.apiBaseUrl}
+          onChange={(event) =>
+            setSettings({ ...settings, apiBaseUrl: event.target.value })
+          }
+          required
+        />
+      </label>
+      <label>
+        API Token
+        <input
+          type="password"
+          value={settings.apiToken}
+          onChange={(event) =>
+            setSettings({ ...settings, apiToken: event.target.value })
+          }
+          required
+        />
+      </label>
+      <div className="settings-actions">
         <button type="submit">保存设置</button>
-      </form>
+        {onCancel && (
+          <button type="button" onClick={onCancel}>
+            取消
+          </button>
+        )}
+      </div>
+    </form>
+  );
+}
+
+function SettingsView({ onSave }: { onSave: (settings: Settings) => void }) {
+  return (
+    <main className="settings-shell">
+      <SettingsForm onSave={onSave} />
     </main>
+  );
+}
+
+function SettingsDialog({
+  onSave,
+  onClose
+}: {
+  onSave: (settings: Settings) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
+      <div className="modal" role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
+        <SettingsForm onSave={onSave} onCancel={onClose} />
+      </div>
+    </div>
   );
 }
 
@@ -102,11 +138,13 @@ function ArticleList({
 function Reader({
   item,
   settings,
-  onChanged
+  onChanged,
+  onBack
 }: {
   item?: ReadBoxItem;
   settings: Settings;
   onChanged: (item?: ReadBoxItem) => void;
+  onBack: () => void;
 }) {
   const html = useMemo(() => {
     if (!item?.content_html) return "";
@@ -132,6 +170,9 @@ function Reader({
   return (
     <article className="reader">
       <div className="reader-actions">
+        <button className="mobile-back" onClick={onBack}>
+          返回
+        </button>
         <a href={currentItem.canonical_url || currentItem.url} target="_blank" rel="noreferrer">
           原文
         </a>
@@ -169,6 +210,8 @@ function App() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [mobilePane, setMobilePane] = useState<"list" | "reader">("list");
 
   const configured = settings.apiBaseUrl && settings.apiToken;
 
@@ -179,13 +222,21 @@ function App() {
     try {
       const data = await listItems(settings, nextMode, query);
       setItems(data);
-      if (selected) {
-        setSelected(data.find((item) => item.id === selected.id));
-      }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "加载失败");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function selectItem(item: ReadBoxItem) {
+    setSelected(item);
+    setMobilePane("reader");
+    setMessage("");
+    try {
+      setSelected(await getItem(settings, item.id));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "加载正文失败");
     }
   }
 
@@ -203,8 +254,9 @@ function App() {
       setUrl("");
       setMode("unread");
       setSelected(item);
+      setMobilePane("reader");
       await refresh("unread");
-      setMessage("已保存");
+      setMessage("已保存，正在后台解析");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "保存失败");
     } finally {
@@ -215,6 +267,7 @@ function App() {
   function saveSettings(next: Settings) {
     setSettings(next);
     setMode("unread");
+    setSettingsOpen(false);
   }
 
   if (!configured) {
@@ -222,11 +275,11 @@ function App() {
   }
 
   return (
-    <main className="app-shell">
+    <main className={`app-shell ${mobilePane === "reader" ? "show-reader" : "show-list"}`}>
       <aside className="sidebar">
         <div className="brand-row">
           <h1>ReadBox</h1>
-          <button onClick={() => setSettings({ apiBaseUrl: "", apiToken: "" })}>
+          <button onClick={() => setSettingsOpen(true)}>
             设置
           </button>
         </div>
@@ -277,7 +330,7 @@ function App() {
 
         {message && <div className="message">{message}</div>}
         {items.length ? (
-          <ArticleList items={items} selected={selected?.id} onSelect={setSelected} />
+          <ArticleList items={items} selected={selected?.id} onSelect={selectItem} />
         ) : (
           <EmptyState mode={mode} />
         )}
@@ -288,9 +341,17 @@ function App() {
         settings={settings}
         onChanged={(item) => {
           setSelected(item);
+          if (!item) {
+            setMobilePane("list");
+          }
           refresh();
         }}
+        onBack={() => setMobilePane("list")}
       />
+
+      {settingsOpen && (
+        <SettingsDialog onSave={saveSettings} onClose={() => setSettingsOpen(false)} />
+      )}
     </main>
   );
 }

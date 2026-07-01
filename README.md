@@ -203,7 +203,9 @@ sqlite3 ./data/readbox.db ".backup './data/readbox-$(date +%Y%m%d-%H%M%S).db'"
 
 ## 正文解析
 
-保存 URL 时，后端会使用浏览器风格请求头抓取页面，优先通过 trafilatura 提取正文；如果正文为空，会回退到 `article`、`main`、常见 `content/article` 容器提取段落。解析层会处理常见中文站点编码、Open Graph 元信息、canonical URL、封面图和中文正文空白。
+保存 URL 时，后端会先写入基础记录并立即返回，然后在后台抓取和解析正文，避免慢网页阻塞保存入口。列表和搜索接口只返回摘要字段；打开单篇文章时再读取完整正文。
+
+解析层会使用浏览器风格请求头抓取页面，优先通过 trafilatura 提取正文；如果正文为空，会回退到 `article`、`main`、常见 `content/article` 容器提取段落。解析层会处理常见中文站点编码、Open Graph 元信息、canonical URL、封面图和中文正文空白。
 
 ## 后续轮次
 

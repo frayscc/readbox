@@ -40,7 +40,24 @@ class Item(BaseModel):
     read_at: Optional[str] = None
 
 
+class ItemSummary(BaseModel):
+    id: int
+    url: str
+    canonical_url: Optional[str] = None
+    title: Optional[str] = None
+    author: Optional[str] = None
+    site_name: Optional[str] = None
+    excerpt: Optional[str] = None
+    cover_url: Optional[str] = None
+    status: ItemStatus
+    is_favorite: bool
+    source: Optional[str] = None
+    created_at: str
+    updated_at: str
+    read_at: Optional[str] = None
+
+
 class ItemListResponse(BaseModel):
-    items: list[Item]
+    items: list[ItemSummary]
     limit: int
     offset: int
