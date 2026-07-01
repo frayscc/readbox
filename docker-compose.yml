@@ -1,0 +1,22 @@
+services:
+  backend:
+    image: frayscc/readbox:backend-latest
+    build: ./backend
+    environment:
+      READBOX_TOKEN: ${READBOX_TOKEN}
+      DATABASE_URL: ${DATABASE_URL:-sqlite:////data/readbox.db}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://localhost:5173}
+    volumes:
+      - ./data:/data
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  web:
+    image: frayscc/readbox:web-latest
+    build: ./web
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
