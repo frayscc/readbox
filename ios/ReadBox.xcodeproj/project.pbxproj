@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		037E2402A113252397D0790A /* ReadBoxAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32BF75E5423B26E8EA488D99 /* ReadBoxAPIClient.swift */; };
 		24E0728ED4E24E28BD5A419D /* AddURLView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1AAC12A56B6D49D33B5818 /* AddURLView.swift */; };
+		29CC4C7CD46EED94CCE8C23E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BE2FB481BDCCD2D175A24849 /* Assets.xcassets */; };
 		3AE49742CC39E8FD205BA3BA /* ReadBoxShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = ECFB43F6D1B41EA2D2749194 /* ReadBoxShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7B1B61DF6E5E5D169A38F0BA /* ReadBoxModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11A3291CBA264A5BA6307856 /* ReadBoxModels.swift */; };
 		7E5A548A828ABF4FC9C7EB44 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4D2C8C159C156E30F481506 /* ShareViewController.swift */; };
@@ -62,6 +63,7 @@
 		A563750001B7538179FAC457 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
 		B691E4C6294ED6D8308BE784 /* ItemListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemListViewModel.swift; sourceTree = "<group>"; };
 		BDB0D200CBFC83D383F67B24 /* ShareViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewModel.swift; sourceTree = "<group>"; };
+		BE2FB481BDCCD2D175A24849 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CC1AAC12A56B6D49D33B5818 /* AddURLView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddURLView.swift; sourceTree = "<group>"; };
 		CF4009ECF80D1AF6C1F1113F /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D5459CCE6A114DB69597F6F4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -116,6 +118,7 @@
 			isa = PBXGroup;
 			children = (
 				CC1AAC12A56B6D49D33B5818 /* AddURLView.swift */,
+				BE2FB481BDCCD2D175A24849 /* Assets.xcassets */,
 				75C4AD550F4E794D79327E16 /* ContentView.swift */,
 				FEDC5A8640E6D1646414FEC0 /* Info.plist */,
 				B691E4C6294ED6D8308BE784 /* ItemListViewModel.swift */,
@@ -152,6 +155,7 @@
 			buildConfigurationList = AB89B1A7ECE0608033B475A9 /* Build configuration list for PBXNativeTarget "ReadBox" */;
 			buildPhases = (
 				CAFD3CDFF126E9A7B93F0A32 /* Sources */,
+				A0A3B3C6F7C7FE4F20654870 /* Resources */,
 				8AA2F689A34CF3E7FD7B3043 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
@@ -202,6 +206,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A0A3B3C6F7C7FE4F20654870 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				29CC4C7CD46EED94CCE8C23E /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1A236DC74872705699D9304C /* Sources */ = {
@@ -351,7 +366,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.4.1;
+				MARKETING_VERSION = 0.4.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -410,7 +425,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.4.1;
+				MARKETING_VERSION = 0.4.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
