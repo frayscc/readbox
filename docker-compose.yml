@@ -3,11 +3,11 @@ services:
     image: frayscc/readbox:backend-0.4.0
     container_name: readbox-backend
     environment:
-      READBOX_TOKEN: ${READBOX_TOKEN:?set READBOX_TOKEN in .env}
+      READBOX_TOKEN: ${READBOX_TOKEN}
       DATABASE_URL: sqlite:////data/readbox.db
-      CORS_ORIGINS: ${CORS_ORIGINS:-https://readbox.example.com}
+      CORS_ORIGINS: ${CORS_ORIGINS}
     volumes:
-      - readbox_data:/data
+      - ./data:/data
     networks:
       - npm
     restart: unless-stopped
@@ -25,6 +25,3 @@ networks:
   npm:
     external: true
     name: npm
-
-volumes:
-  readbox_data:
