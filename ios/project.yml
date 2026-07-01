@@ -4,7 +4,7 @@ options:
     iOS: "17.0"
 settings:
   base:
-    MARKETING_VERSION: 0.4.0
+    MARKETING_VERSION: 0.4.1
     CURRENT_PROJECT_VERSION: 1
 targets:
   ReadBox:
@@ -15,6 +15,9 @@ targets:
       - path: Shared
     info:
       path: ReadBox/Info.plist
+      properties:
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
     entitlements:
       path: ReadBox/ReadBox.entitlements
     settings:
@@ -33,6 +36,16 @@ targets:
       - path: Shared
     info:
       path: ReadBoxShareExtension/Info.plist
+      properties:
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsText: true
+              NSExtensionActivationSupportsWebURLWithMaxCount: 1
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
     entitlements:
       path: ReadBoxShareExtension/ReadBoxShareExtension.entitlements
     settings:
