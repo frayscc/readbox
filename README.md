@@ -1,6 +1,6 @@
 # ReadBox
 
-ReadBox 是一个轻量级、自部署、单用户的稍后阅读收件箱。第一轮 MVP 只包含 backend + web，用来打通保存入口、后端解析、跨端阅读和标记已读。
+ReadBox 是一个轻量级、自部署、单用户的稍后阅读收件箱。当前 MVP 包含 backend、web 和 Chrome 插件，用来打通保存入口、后端解析、跨端阅读和标记已读。
 
 ## 当前功能
 
@@ -10,6 +10,7 @@ ReadBox 是一个轻量级、自部署、单用户的稍后阅读收件箱。第
 - trafilatura 最佳努力提取网页标题、正文和元信息
 - React + Vite 单页 Web
 - Web 支持设置 API、添加 URL、未读/已读/收藏、搜索、阅读、删除
+- Chrome Manifest V3 插件，支持 popup 保存当前页和右键菜单保存
 - Docker Compose 部署 backend + web
 
 ## 目录
@@ -31,6 +32,15 @@ readbox/
 │   ├── src/
 │   ├── package.json
 │   └── Dockerfile
+├── chrome-extension/
+│   ├── manifest.json
+│   ├── readbox.js
+│   ├── popup.html
+│   ├── popup.js
+│   ├── options.html
+│   ├── options.js
+│   ├── background.js
+│   └── styles.css
 ├── docker-compose.yml
 ├── .env.example
 └── README.md
@@ -76,6 +86,23 @@ npm run dev
 ```
 
 开发模式下访问 http://localhost:5173。
+
+## Chrome 插件
+
+加载未打包插件：
+
+1. 打开 `chrome://extensions`
+2. 开启 Developer mode
+3. 点击 Load unpacked
+4. 选择本仓库的 `chrome-extension` 目录
+5. 打开插件 Options，填写 API Base URL 和 API Token
+
+保存入口：
+
+- 点击工具栏里的 ReadBox 图标，然后点击“保存当前页面”
+- 在网页或链接上右键，点击 “Save to ReadBox”
+
+插件会把当前页面的 `title` 和 `url` 发送到 `POST /api/items`，`source` 固定为 `chrome_extension`。如果未配置 API、Token 错误、网络失败或后端返回错误，popup 会显示对应提示；右键保存失败时会在扩展 service worker 控制台记录错误，并短暂显示 `ERR` badge。
 
 ## API 示例
 
@@ -123,4 +150,13 @@ sqlite3 ./data/readbox.db ".backup './data/readbox-$(date +%Y%m%d-%H%M%S).db'"
 
 ## 后续轮次
 
-第二轮建议只加 Chrome 插件，复用现有 `POST /api/items`。第三轮再加 iOS App + Share Extension。正文解析和中文网站兼容可以在第四轮集中优化，AI 摘要、Outline 同步、自动清理继续延后。
+第三轮建议加 iOS App + Share Extension。正文解析和中文网站兼容可以在第四轮集中优化，AI 摘要、Outline 同步、自动清理继续延后。
+
+## 发布约定
+
+从 `0.2.0` 开始，推送发布时使用语义化版本号：
+
+- Git tag: `vX.Y.Z`
+- Docker backend: `frayscc/readbox:backend-X.Y.Z`
+- Docker web: `frayscc/readbox:web-X.Y.Z`
+- 可同时更新 `backend-latest` 和 `web-latest`

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ReadBox</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <header>
+        <h1>ReadBox</h1>
+        <a href="options.html" target="_blank">设置</a>
+      </header>
+
+      <section class="page-info">
+        <div id="pageTitle" class="title">Loading...</div>
+        <div id="pageUrl" class="url"></div>
+      </section>
+
+      <button id="saveButton" type="button">保存当前页面</button>
+      <div id="status" class="status" role="status"></div>
+    </main>
+
+    <script src="readbox.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
