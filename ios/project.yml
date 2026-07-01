@@ -1,0 +1,42 @@
+name: ReadBox
+options:
+  deploymentTarget:
+    iOS: "17.0"
+settings:
+  base:
+    MARKETING_VERSION: 0.3.0
+    CURRENT_PROJECT_VERSION: 1
+targets:
+  ReadBox:
+    type: application
+    platform: iOS
+    sources:
+      - path: ReadBox
+      - path: Shared
+    info:
+      path: ReadBox/Info.plist
+    entitlements:
+      path: ReadBox/ReadBox.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.readbox
+        CODE_SIGN_STYLE: Automatic
+    dependencies:
+      - target: ReadBoxShareExtension
+        embed: true
+
+  ReadBoxShareExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ReadBoxShareExtension
+      - path: Shared
+    info:
+      path: ReadBoxShareExtension/Info.plist
+    entitlements:
+      path: ReadBoxShareExtension/ReadBoxShareExtension.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.readbox.share
+        CODE_SIGN_STYLE: Automatic
+        APPLICATION_EXTENSION_API_ONLY: true

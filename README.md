@@ -1,6 +1,6 @@
 # ReadBox
 
-ReadBox 是一个轻量级、自部署、单用户的稍后阅读收件箱。当前 MVP 包含 backend、web 和 Chrome 插件，用来打通保存入口、后端解析、跨端阅读和标记已读。
+ReadBox 是一个轻量级、自部署、单用户的稍后阅读收件箱。当前 MVP 包含 backend、web、Chrome 插件和 iOS 基础源码，用来打通保存入口、后端解析、跨端阅读和标记已读。
 
 ## 当前功能
 
@@ -11,6 +11,7 @@ ReadBox 是一个轻量级、自部署、单用户的稍后阅读收件箱。当
 - React + Vite 单页 Web
 - Web 支持设置 API、添加 URL、未读/已读/收藏、搜索、阅读、删除
 - Chrome Manifest V3 插件，支持 popup 保存当前页和右键菜单保存
+- iOS SwiftUI App + Share Extension 基础源码
 - Docker Compose 部署 backend + web
 
 ## 目录
@@ -41,6 +42,11 @@ readbox/
 │   ├── options.js
 │   ├── background.js
 │   └── styles.css
+├── ios/
+│   ├── Shared/
+│   ├── ReadBox/
+│   ├── ReadBoxShareExtension/
+│   └── README.md
 ├── docker-compose.yml
 ├── .env.example
 └── README.md
@@ -104,6 +110,42 @@ npm run dev
 
 插件会把当前页面的 `title` 和 `url` 发送到 `POST /api/items`，`source` 固定为 `chrome_extension`。如果未配置 API、Token 错误、网络失败或后端返回错误，popup 会显示对应提示；右键保存失败时会在扩展 service worker 控制台记录错误，并短暂显示 `ERR` badge。
 
+## iOS App 和 Share Extension
+
+iOS 源码位于 `ios/`，并包含可直接打开的 `ios/ReadBox.xcodeproj`：
+
+- `ios/ReadBox`: SwiftUI 主 App
+- `ios/ReadBoxShareExtension`: Share Extension
+- `ios/Shared`: 主 App 和扩展共用的 settings、models、API client
+
+主 App 支持：
+
+- 设置 API Base URL 和 API Token
+- 查看未读、已读、收藏列表
+- 打开阅读页
+- 标记已读 / 恢复未读
+- 收藏 / 取消收藏
+- 删除
+- 手动粘贴 URL 保存
+
+Share Extension 支持：
+
+- 接收 `public.url`
+- 接收 `public.plain-text`
+- 从文本中提取第一个 `http/https` URL
+- 调用后端 `POST /api/items`
+- `source` 设置为 `ios_share`
+
+使用方式：
+
+1. 打开 `ios/ReadBox.xcodeproj`。
+2. 修改 `ios/Shared/SettingsStore.swift` 里的 App Group。
+3. 修改两个 entitlements 文件里的 App Group，并在 Xcode 为两个 target 启用相同 App Group。
+4. 配置 bundle id、Team 和 signing。
+5. 用 Xcode 构建，或打包后通过 AltStore 侧载。
+
+更详细的 Xcode 和 AltStore 说明见 `ios/README.md`。
+
 ## API 示例
 
 ```bash
@@ -150,7 +192,7 @@ sqlite3 ./data/readbox.db ".backup './data/readbox-$(date +%Y%m%d-%H%M%S).db'"
 
 ## 后续轮次
 
-第三轮建议加 iOS App + Share Extension。正文解析和中文网站兼容可以在第四轮集中优化，AI 摘要、Outline 同步、自动清理继续延后。
+第四轮建议集中优化正文解析和中文网站兼容。AI 摘要、Outline 同步、自动清理继续延后。
 
 ## 发布约定
 
