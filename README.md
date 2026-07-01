@@ -7,7 +7,8 @@ ReadBox 是一个轻量级、自部署、单用户的稍后阅读收件箱。当
 - FastAPI 后端，Bearer Token 鉴权
 - SQLite 数据库存储，启动时开启 WAL
 - SQLite FTS5 搜索标题和正文
-- trafilatura 最佳努力提取网页标题、正文和元信息
+- trafilatura + fallback 解析网页标题、正文、元信息和封面图
+- 中文网页兼容：常见 GBK/GB2312 编码、中文空白规整、Open Graph/canonical fallback
 - React + Vite 单页 Web
 - Web 支持设置 API、添加 URL、未读/已读/收藏、搜索、阅读、删除
 - Chrome Manifest V3 插件，支持 popup 保存当前页和右键菜单保存
@@ -81,6 +82,16 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 READBOX_TOKEN=dev-token DATABASE_URL=sqlite:///../data/readbox.db uvicorn app.main:app --reload
+```
+
+后端测试：
+
+```bash
+cd backend
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+cd ..
+python -m pytest
 ```
 
 前端：
@@ -190,9 +201,13 @@ sqlite3 ./data/readbox.db ".backup './data/readbox-$(date +%Y%m%d-%H%M%S).db'"
 
 也可以停止服务后直接复制 `./data` 目录。
 
+## 正文解析
+
+保存 URL 时，后端会使用浏览器风格请求头抓取页面，优先通过 trafilatura 提取正文；如果正文为空，会回退到 `article`、`main`、常见 `content/article` 容器提取段落。解析层会处理常见中文站点编码、Open Graph 元信息、canonical URL、封面图和中文正文空白。
+
 ## 后续轮次
 
-第四轮建议集中优化正文解析和中文网站兼容。AI 摘要、Outline 同步、自动清理继续延后。
+第五轮再考虑 AI 摘要、Outline 同步、自动清理。
 
 ## 发布约定
 
