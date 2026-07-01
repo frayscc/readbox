@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ReadBox",
   "description": "Save the current page to your self-hosted ReadBox.",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "permissions": ["activeTab", "contextMenus", "storage", "tabs"],
   "host_permissions": ["<all_urls>"],
   "action": {

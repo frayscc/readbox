@@ -215,7 +215,9 @@ sqlite3 ./data/readbox.db ".backup './data/readbox-$(date +%Y%m%d-%H%M%S).db'"
 
 从 `0.2.0` 开始，推送发布时使用语义化版本号：
 
+- 当前版本源记录在 `VERSION`，发布前同步更新各端版本字段
 - Git tag: `vX.Y.Z`
 - Docker backend: `frayscc/readbox:backend-X.Y.Z`
 - Docker web: `frayscc/readbox:web-X.Y.Z`
 - 可同时更新 `backend-latest` 和 `web-latest`
+- 发布前按 `docs/release-checklist.md` 核对
