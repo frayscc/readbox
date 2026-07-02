@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00CFB06A9C7D38005503F0C8 /* ReadBoxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B19F2A1ED80EFF3FBC1ABD6E /* ReadBoxTheme.swift */; };
 		037E2402A113252397D0790A /* ReadBoxAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32BF75E5423B26E8EA488D99 /* ReadBoxAPIClient.swift */; };
 		24E0728ED4E24E28BD5A419D /* AddURLView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1AAC12A56B6D49D33B5818 /* AddURLView.swift */; };
 		29CC4C7CD46EED94CCE8C23E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BE2FB481BDCCD2D175A24849 /* Assets.xcassets */; };
@@ -18,6 +19,7 @@
 		91A775922DAC982C8A12C00D /* ReadBoxModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11A3291CBA264A5BA6307856 /* ReadBoxModels.swift */; };
 		9F943B6AD0C3F8626B3994B7 /* ShareViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB0D200CBFC83D383F67B24 /* ShareViewModel.swift */; };
 		B0C4EBDECD7825D4DB5EA534 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A563750001B7538179FAC457 /* SettingsStore.swift */; };
+		DB8C78C8FD4A18B1BDA93427 /* ReadBoxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B19F2A1ED80EFF3FBC1ABD6E /* ReadBoxTheme.swift */; };
 		DF91B5F0578F5104CAE02815 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A563750001B7538179FAC457 /* SettingsStore.swift */; };
 		E3F6CCDF58860FD005AFD6FB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF4009ECF80D1AF6C1F1113F /* SettingsView.swift */; };
 		EDF61F5E4ACDCCEC07086E06 /* ReadBoxAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32BF75E5423B26E8EA488D99 /* ReadBoxAPIClient.swift */; };
@@ -61,6 +63,7 @@
 		75C4AD550F4E794D79327E16 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7AFC079466A4642B5184C9AB /* ReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderView.swift; sourceTree = "<group>"; };
 		A563750001B7538179FAC457 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		B19F2A1ED80EFF3FBC1ABD6E /* ReadBoxTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadBoxTheme.swift; sourceTree = "<group>"; };
 		B691E4C6294ED6D8308BE784 /* ItemListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemListViewModel.swift; sourceTree = "<group>"; };
 		BDB0D200CBFC83D383F67B24 /* ShareViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewModel.swift; sourceTree = "<group>"; };
 		BE2FB481BDCCD2D175A24849 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -109,6 +112,7 @@
 			children = (
 				32BF75E5423B26E8EA488D99 /* ReadBoxAPIClient.swift */,
 				11A3291CBA264A5BA6307856 /* ReadBoxModels.swift */,
+				B19F2A1ED80EFF3FBC1ABD6E /* ReadBoxTheme.swift */,
 				A563750001B7538179FAC457 /* SettingsStore.swift */,
 			);
 			path = Shared;
@@ -225,6 +229,7 @@
 			files = (
 				EDF61F5E4ACDCCEC07086E06 /* ReadBoxAPIClient.swift in Sources */,
 				7B1B61DF6E5E5D169A38F0BA /* ReadBoxModels.swift in Sources */,
+				00CFB06A9C7D38005503F0C8 /* ReadBoxTheme.swift in Sources */,
 				DF91B5F0578F5104CAE02815 /* SettingsStore.swift in Sources */,
 				F67C067C26026DC82F243B3B /* ShareExtensionView.swift in Sources */,
 				7E5A548A828ABF4FC9C7EB44 /* ShareViewController.swift in Sources */,
@@ -242,6 +247,7 @@
 				037E2402A113252397D0790A /* ReadBoxAPIClient.swift in Sources */,
 				7FD4BE0306A583B5DADAE1B8 /* ReadBoxApp.swift in Sources */,
 				91A775922DAC982C8A12C00D /* ReadBoxModels.swift in Sources */,
+				DB8C78C8FD4A18B1BDA93427 /* ReadBoxTheme.swift in Sources */,
 				F81C3B613C088736CFE53774 /* ReaderView.swift in Sources */,
 				B0C4EBDECD7825D4DB5EA534 /* SettingsStore.swift in Sources */,
 				E3F6CCDF58860FD005AFD6FB /* SettingsView.swift in Sources */,
@@ -366,7 +372,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.4.2;
+				MARKETING_VERSION = 0.5.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -425,7 +431,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.4.2;
+				MARKETING_VERSION = 0.5.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

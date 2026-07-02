@@ -24,6 +24,30 @@ function loadSettings(): Settings {
   }
 }
 
+function itemDomain(item: ReadBoxItem) {
+  if (item.site_name) return item.site_name;
+  try {
+    return new URL(item.url).hostname;
+  } catch {
+    return "readbox.local";
+  }
+}
+
+function BrandMark() {
+  return (
+    <span className="mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path
+          d="M7 4.5h7.4L18 8.1v11.4H7V4.5Z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        />
+        <path d="M14 4.5v4h4" stroke="currentColor" strokeWidth="1.8" />
+      </svg>
+    </span>
+  );
+}
+
 function SettingsForm({
   onSave,
   onCancel
@@ -41,11 +65,18 @@ function SettingsForm({
 
   return (
     <form className="settings-panel" onSubmit={submit}>
-      <h1>ReadBox</h1>
+      <div className="settings-title">
+        <BrandMark />
+        <div>
+          <h1 id="settings-title">服务设置</h1>
+          <p>填写自部署后端地址和访问令牌。信息仅保存在本机。</p>
+        </div>
+      </div>
+
       <label>
         API Base URL
         <input
-          placeholder="http://localhost:8000"
+          placeholder="https://readbox.example.com"
           value={settings.apiBaseUrl}
           onChange={(event) =>
             setSettings({ ...settings, apiBaseUrl: event.target.value })
@@ -53,6 +84,7 @@ function SettingsForm({
           required
         />
       </label>
+
       <label>
         API Token
         <input
@@ -64,13 +96,16 @@ function SettingsForm({
           required
         />
       </label>
+
       <div className="settings-actions">
-        <button type="submit">保存设置</button>
         {onCancel && (
-          <button type="button" onClick={onCancel}>
+          <button className="text-btn" type="button" onClick={onCancel}>
             取消
           </button>
         )}
+        <button className="primary" type="submit">
+          保存设置
+        </button>
       </div>
     </form>
   );
@@ -93,7 +128,13 @@ function SettingsDialog({
 }) {
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
-      <div className="modal" role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
+      <div
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
         <SettingsForm onSave={onSave} onCancel={onClose} />
       </div>
     </div>
@@ -101,9 +142,18 @@ function SettingsDialog({
 }
 
 function EmptyState({ mode }: { mode: ListMode }) {
-  const text =
-    mode === "search" ? "输入关键词搜索已保存文章" : "这里还没有文章";
-  return <div className="empty">{text}</div>;
+  const title = mode === "search" ? "没有匹配文章" : "这里还没有文章";
+  const hint =
+    mode === "search"
+      ? "换一个关键词，或先保存一个 URL。"
+      : "从浏览器扩展、iOS 分享菜单或上方输入框保存第一个网页链接。";
+
+  return (
+    <div className="empty">
+      <h3>{title}</h3>
+      <p>{hint}</p>
+    </div>
+  );
 }
 
 function ArticleList({
@@ -123,11 +173,19 @@ function ArticleList({
           key={item.id}
           onClick={() => onSelect(item)}
         >
-          <span className="item-title">{item.title || item.url}</span>
+          <span className="item-top">
+            <span className="item-title">{item.title || item.url}</span>
+            <span
+              className={`dot ${
+                item.status === "read" ? "read" : item.content_text ? "" : "warn"
+              }`}
+            />
+          </span>
           {item.excerpt && <span className="item-excerpt">{item.excerpt}</span>}
           <span className="item-meta">
-            {item.site_name || new URL(item.url).hostname}
-            {item.is_favorite ? " / 收藏" : ""}
+            {itemDomain(item)}
+            {item.is_favorite ? " · 收藏" : ""}
+            {item.status === "read" ? " · 已读" : ""}
           </span>
         </button>
       ))}
@@ -152,7 +210,20 @@ function Reader({
   }, [item]);
 
   if (!item) {
-    return <article className="reader empty-reader">选择一篇文章开始阅读</article>;
+    return (
+      <main className="reader">
+        <header className="reader-top">
+          <span className="domain">readbox.local / empty</span>
+        </header>
+        <article className="article empty-reader">
+          <div>
+            <BrandMark />
+            <h2>选择一篇文章开始阅读</h2>
+            <p>ReadBox 会把正文放在安静的阅读面里，适合长时间阅读。</p>
+          </div>
+        </article>
+      </main>
+    );
   }
 
   const currentItem = item;
@@ -168,36 +239,60 @@ function Reader({
   }
 
   return (
-    <article className="reader">
-      <div className="reader-actions">
-        <button className="mobile-back" onClick={onBack}>
-          返回
+    <main className="reader">
+      <header className="reader-top">
+        <button className="text-btn mobile-back" onClick={onBack}>
+          返回列表
         </button>
-        <a href={currentItem.canonical_url || currentItem.url} target="_blank" rel="noreferrer">
-          原文
-        </a>
-        <button onClick={() => patch({ status: currentItem.status === "read" ? "unread" : "read" })}>
-          {currentItem.status === "read" ? "恢复未读" : "标记已读"}
-        </button>
-        <button onClick={() => patch({ is_favorite: !currentItem.is_favorite })}>
-          {currentItem.is_favorite ? "取消收藏" : "收藏"}
-        </button>
-        <button className="danger" onClick={remove}>
-          删除
-        </button>
-      </div>
-      <h1>{item.title || item.url}</h1>
-      <div className="byline">
-        {[item.site_name, item.author].filter(Boolean).join(" / ")}
-      </div>
-      {html ? (
-        <div className="article-body" dangerouslySetInnerHTML={{ __html: html }} />
-      ) : (
-        <p className="fallback-text">
-          暂无提取正文。可以打开原文链接阅读，保存记录已经保留。
-        </p>
-      )}
-    </article>
+        <span className="domain">
+          {itemDomain(currentItem).toLowerCase()} /{" "}
+          {currentItem.content_html ? "parsed" : "saved"}
+        </span>
+        <div className="reader-actions">
+          <a
+            className="text-btn"
+            href={currentItem.canonical_url || currentItem.url}
+            target="_blank"
+            rel="noreferrer"
+          >
+            原文
+          </a>
+          <button
+            className="text-btn"
+            onClick={() =>
+              patch({ status: currentItem.status === "read" ? "unread" : "read" })
+            }
+          >
+            {currentItem.status === "read" ? "恢复未读" : "标记已读"}
+          </button>
+          <button
+            className="text-btn"
+            onClick={() => patch({ is_favorite: !currentItem.is_favorite })}
+          >
+            {currentItem.is_favorite ? "取消收藏" : "收藏"}
+          </button>
+          <button className="text-btn danger" onClick={remove}>
+            删除
+          </button>
+        </div>
+      </header>
+
+      <article className="article">
+        <div className="article-inner">
+          <h1>{item.title || item.url}</h1>
+          <div className="byline">
+            {[item.site_name, item.author].filter(Boolean).join(" / ") || "ReadBox"}
+          </div>
+          {html ? (
+            <div className="article-body" dangerouslySetInnerHTML={{ __html: html }} />
+          ) : (
+            <p className="fallback-text">
+              暂无提取正文。可以打开原文链接阅读，保存记录已经保留。
+            </p>
+          )}
+        </div>
+      </article>
+    </main>
   );
 }
 
@@ -277,59 +372,80 @@ function App() {
   return (
     <main className={`app-shell ${mobilePane === "reader" ? "show-reader" : "show-list"}`}>
       <aside className="sidebar">
-        <div className="brand-row">
-          <h1>ReadBox</h1>
-          <button onClick={() => setSettingsOpen(true)}>
-            设置
-          </button>
-        </div>
-
-        <form className="add-form" onSubmit={addUrl}>
-          <input
-            type="url"
-            placeholder="粘贴文章 URL"
-            value={url}
-            onChange={(event) => setUrl(event.target.value)}
-            required
-          />
-          <button disabled={loading}>保存</button>
-        </form>
-
-        <div className="tabs">
-          {[
-            ["unread", "未读"],
-            ["read", "已读"],
-            ["favorite", "收藏"],
-            ["search", "搜索"]
-          ].map(([value, label]) => (
+        <div className="side-head">
+          <div className="brand-row">
+            <div className="brand">
+              <BrandMark />
+              <h1>ReadBox</h1>
+            </div>
             <button
-              key={value}
-              className={mode === value ? "active" : ""}
-              onClick={() => setMode(value as ListMode)}
+              className="icon-btn"
+              aria-label="设置"
+              onClick={() => setSettingsOpen(true)}
             >
-              {label}
+              <span aria-hidden="true">⌘</span>
             </button>
-          ))}
+          </div>
+
+          <form className="add-form" onSubmit={addUrl}>
+            <input
+              type="url"
+              placeholder="粘贴 URL 保存到 ReadBox"
+              value={url}
+              onChange={(event) => setUrl(event.target.value)}
+              required
+            />
+            <button className="primary" disabled={loading}>
+              保存
+            </button>
+          </form>
+
+          <div className="tabs">
+            {[
+              ["unread", "未读"],
+              ["read", "已读"],
+              ["favorite", "收藏"],
+              ["search", "搜索"]
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                className={`chip ${mode === value ? "active" : ""}`}
+                onClick={() => setMode(value as ListMode)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {mode === "search" && (
+            <form
+              className="search-form"
+              onSubmit={(event) => {
+                event.preventDefault();
+                refresh("search");
+              }}
+            >
+              <input
+                placeholder="搜索标题、来源或摘要"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+            </form>
+          )}
         </div>
 
-        {mode === "search" && (
-          <form
-            className="search-form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              refresh("search");
-            }}
-          >
-            <input
-              placeholder="搜索标题和正文"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </form>
+        {message && (
+          <div className="message" role="status">
+            {message}
+          </div>
         )}
-
-        {message && <div className="message">{message}</div>}
-        {items.length ? (
+        {loading && !items.length ? (
+          <div className="list skeleton-list" aria-label="加载中">
+            <span />
+            <span />
+            <span />
+          </div>
+        ) : items.length ? (
           <ArticleList items={items} selected={selected?.id} onSelect={selectItem} />
         ) : (
           <EmptyState mode={mode} />

@@ -6,14 +6,25 @@
     <title>ReadBox 设置</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
+  <body class="options-body">
     <main class="options">
-      <form id="settingsForm" class="panel">
-        <h1>ReadBox 设置</h1>
+      <form id="settingsForm" class="options-panel">
+        <div class="options-title">
+          <span class="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M7 4.5h7.4L18 8.1v11.4H7V4.5Z" stroke="currentColor" stroke-width="1.8" />
+              <path d="M14 4.5v4h4" stroke="currentColor" stroke-width="1.8" />
+            </svg>
+          </span>
+          <div>
+            <h1>ReadBox Options</h1>
+            <p>Chrome 扩展只保存服务地址和令牌，不存储文章正文。</p>
+          </div>
+        </div>
 
         <label>
           API Base URL
-          <input id="apiBaseUrl" type="url" placeholder="http://localhost:8000" required />
+          <input id="apiBaseUrl" type="url" placeholder="https://readbox.example.com" required />
         </label>
 
         <label>
@@ -21,7 +32,9 @@
           <input id="apiToken" type="password" required />
         </label>
 
-        <button type="submit">保存设置</button>
+        <div class="options-actions">
+          <button class="save" type="submit">保存配置</button>
+        </div>
         <div id="status" class="status" role="status"></div>
       </form>
     </main>

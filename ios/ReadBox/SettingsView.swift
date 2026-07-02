@@ -9,29 +9,58 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Server") {
-                    TextField("https://readbox.example.com", text: $apiBaseURL)
-                        .textInputAutocapitalization(.never)
-                        .keyboardType(.URL)
-                    SecureField("API Token", text: $apiToken)
-                }
+            ZStack {
+                ReadBoxTheme.bg.ignoresSafeArea()
 
-                Section {
-                    Button("Save") {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack(spacing: 10) {
+                        ReadBoxMark(size: 34)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("设置")
+                                .font(.system(size: 30, weight: .bold, design: .rounded))
+                                .foregroundStyle(ReadBoxTheme.inkDeep)
+                            Text("连接你的自部署 ReadBox 服务")
+                                .font(.subheadline)
+                                .foregroundStyle(ReadBoxTheme.muted)
+                        }
+                    }
+
+                    ReadBoxCard {
+                        VStack(alignment: .leading, spacing: 14) {
+                            FieldLabel("API Base URL")
+                            TextField("https://readbox.example.com", text: $apiBaseURL)
+                                .textInputAutocapitalization(.never)
+                                .keyboardType(.URL)
+                                .textFieldStyle(ReadBoxTextFieldStyle())
+
+                            FieldLabel("API Token")
+                            SecureField("API Token", text: $apiToken)
+                                .textFieldStyle(ReadBoxTextFieldStyle())
+                        }
+                    }
+
+                    Text("这些信息只保存在本机。Chrome 插件和 Web 端需要分别配置。")
+                        .font(.footnote)
+                        .foregroundStyle(ReadBoxTheme.muted)
+
+                    Button("保存设置") {
                         ReadBoxSettings.apiBaseURL = apiBaseURL
                         ReadBoxSettings.apiToken = apiToken
                         onSave()
                         dismiss()
                     }
+                    .buttonStyle(ReadBoxPrimaryButtonStyle())
+
+                    Spacer()
                 }
+                .padding(18)
             }
-            .navigationTitle("Settings")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") {
+                    Button("关闭") {
                         dismiss()
                     }
+                    .foregroundStyle(ReadBoxTheme.ink)
                 }
             }
         }

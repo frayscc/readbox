@@ -1,6 +1,6 @@
 services:
   backend:
-    image: frayscc/readbox:backend-0.4.2
+    image: frayscc/readbox:backend-0.5.0
     container_name: readbox-backend
     environment:
       READBOX_TOKEN: ${READBOX_TOKEN}
@@ -13,7 +13,7 @@ services:
     restart: unless-stopped
 
   web:
-    image: frayscc/readbox:web-0.4.2
+    image: frayscc/readbox:web-0.5.0
     container_name: readbox-web
     depends_on:
       - backend

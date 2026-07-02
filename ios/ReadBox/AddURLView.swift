@@ -12,34 +12,65 @@ struct AddURLView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Article") {
-                    TextField("https://example.com/article", text: $url)
-                        .textInputAutocapitalization(.never)
-                        .keyboardType(.URL)
-                    TextField("Optional title", text: $title)
-                }
+            ZStack {
+                ReadBoxTheme.bg.ignoresSafeArea()
 
-                if let message {
-                    Section {
-                        Text(message)
-                            .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 18) {
+                    Capsule()
+                        .fill(ReadBoxTheme.border)
+                        .frame(width: 44, height: 5)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 4)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("添加 URL")
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundStyle(ReadBoxTheme.inkDeep)
+                        Text("保存后会立即进入列表，后端继续解析正文。")
+                            .font(.subheadline)
+                            .foregroundStyle(ReadBoxTheme.muted)
                     }
-                }
 
-                Section {
-                    Button(isSaving ? "Saving..." : "Save") {
+                    ReadBoxCard {
+                        VStack(alignment: .leading, spacing: 14) {
+                            FieldLabel("网页链接")
+                            TextField("https://example.com/article", text: $url)
+                                .textInputAutocapitalization(.never)
+                                .keyboardType(.URL)
+                                .textFieldStyle(ReadBoxTextFieldStyle())
+
+                            FieldLabel("标题（可选）")
+                            TextField("Optional title", text: $title)
+                                .textFieldStyle(ReadBoxTextFieldStyle())
+                        }
+                    }
+
+                    if let message {
+                        Text(message)
+                            .font(.subheadline)
+                            .foregroundStyle(ReadBoxTheme.muted)
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(ReadBoxTheme.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+
+                    Button(isSaving ? "保存中..." : "保存到 ReadBox") {
                         Task { await save() }
                     }
+                    .buttonStyle(ReadBoxPrimaryButtonStyle())
                     .disabled(isSaving || url.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+                    Spacer()
                 }
+                .padding(18)
             }
-            .navigationTitle("Add URL")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button("取消") {
                         dismiss()
                     }
+                    .foregroundStyle(ReadBoxTheme.ink)
                 }
             }
         }
@@ -54,12 +85,40 @@ struct AddURLView: View {
             _ = try await client.createItem(
                 url: url.trimmingCharacters(in: .whitespacesAndNewlines),
                 title: title.isEmpty ? nil : title,
-                source: "web"
+                source: "ios"
             )
             onSave()
             dismiss()
         } catch {
             message = error.localizedDescription
         }
+    }
+}
+
+struct FieldLabel: View {
+    let text: String
+
+    init(_ text: String) {
+        self.text = text
+    }
+
+    var body: some View {
+        Text(text)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(ReadBoxTheme.inkDeep)
+    }
+}
+
+struct ReadBoxTextFieldStyle: TextFieldStyle {
+    func _body(configuration: TextField<Self._Label>) -> some View {
+        configuration
+            .padding(.horizontal, 12)
+            .frame(height: 44)
+            .background(ReadBoxTheme.bg)
+            .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 13, style: .continuous)
+                    .stroke(ReadBoxTheme.border, lineWidth: 1)
+            }
     }
 }

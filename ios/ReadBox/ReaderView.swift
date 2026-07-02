@@ -15,38 +15,61 @@ struct ReaderView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                Text(item.title ?? item.url)
-                    .font(.largeTitle.weight(.bold))
+        ZStack {
+            ReadBoxTheme.reader.ignoresSafeArea()
 
-                Link("Open Original", destination: URL(string: item.canonicalURL ?? item.url)!)
-                    .font(.subheadline)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text(item.title ?? item.url)
+                        .font(.system(size: 30, weight: .bold, design: .rounded))
+                        .lineSpacing(2)
+                        .foregroundStyle(ReadBoxTheme.inkDeep)
 
-                if let message {
-                    Text(message)
-                        .foregroundStyle(.secondary)
+                    HStack(spacing: 12) {
+                        Text(item.siteName ?? URL(string: item.url)?.host ?? "ReadBox")
+                        Text("保存于 ReadBox")
+                    }
+                    .font(.caption)
+                    .foregroundStyle(ReadBoxTheme.muted)
+
+                    if let message {
+                        Text(message)
+                            .font(.subheadline)
+                            .foregroundStyle(ReadBoxTheme.muted)
+                            .padding(12)
+                            .background(ReadBoxTheme.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+
+                    if let html = item.contentHTML, !html.isEmpty {
+                        HTMLReader(html: html)
+                            .frame(minHeight: 520)
+                    } else {
+                        Text(item.contentText ?? "暂无提取正文。可以打开原文链接阅读，保存记录已经保留。")
+                            .font(.system(size: 18, design: .serif))
+                            .lineSpacing(8)
+                            .foregroundStyle(ReadBoxTheme.ink)
+                    }
                 }
-
-                if let html = item.contentHTML, !html.isEmpty {
-                    HTMLReader(html: html)
-                        .frame(minHeight: 480)
-                } else {
-                    Text(item.contentText ?? "No extracted article body yet. Open the original link to read it.")
-                        .font(.body)
-                        .lineSpacing(6)
-                }
+                .frame(maxWidth: 760, alignment: .leading)
+                .padding(.horizontal, 24)
+                .padding(.top, 22)
+                .padding(.bottom, 40)
             }
-            .frame(maxWidth: 760, alignment: .leading)
-            .padding()
         }
-        .navigationTitle("Reader")
+        .navigationTitle("阅读")
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await loadDetail()
         }
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
+                if let originalURL = URL(string: item.canonicalURL ?? item.url) {
+                    Link(destination: originalURL) {
+                        Image(systemName: "safari")
+                    }
+                }
+
                 Button {
                     Task { await toggleRead() }
                 } label: {
@@ -126,8 +149,30 @@ struct HTMLReader: UIViewRepresentable {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
             body { font: -apple-system-body; line-height: 1.65; padding: 0; margin: 0; color: CanvasText; background: Canvas; }
-            img, video { max-width: 100%; height: auto; }
-            pre { overflow-x: auto; }
+            body {
+              color: #183b34;
+              background: #fffef9;
+              font-family: "LXGW WenKai Screen", "Songti SC", "Noto Serif CJK SC", serif;
+              font-size: 18px;
+              line-height: 1.82;
+              padding: 0;
+              margin: 0;
+            }
+            p, li, blockquote { margin: 0 0 1.05em; }
+            h1, h2, h3 {
+              color: #0c211e;
+              font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+              line-height: 1.25;
+              margin: 1.4em 0 .7em;
+            }
+            img, video { max-width: 100%; height: auto; border-radius: 12px; }
+            pre {
+              overflow-x: auto;
+              border: 1px solid #dce5df;
+              border-radius: 12px;
+              padding: 12px;
+              background: #ffffff;
+            }
           </style>
         </head>
         <body>\(html)</body>

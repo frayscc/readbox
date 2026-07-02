@@ -9,9 +9,9 @@ enum ItemListMode: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .unread: return "Unread"
-        case .read: return "Read"
-        case .favorite: return "Favorites"
+        case .unread: return "未读"
+        case .read: return "已读"
+        case .favorite: return "收藏"
         }
     }
 }
@@ -28,7 +28,7 @@ final class ItemListViewModel: ObservableObject {
     func load() async {
         guard ReadBoxSettings.isConfigured else {
             items = []
-            message = "Open settings to configure your server."
+            message = "请先在设置里配置服务地址和 Token。"
             return
         }
 

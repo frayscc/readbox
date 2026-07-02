@@ -6,20 +6,29 @@
     <title>ReadBox</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
+  <body class="popup-body">
     <main class="popup">
-      <header>
-        <h1>ReadBox</h1>
-        <a href="options.html" target="_blank">设置</a>
+      <header class="popup-head">
+        <div class="brand">
+          <span class="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M7 4.5h7.4L18 8.1v11.4H7V4.5Z" stroke="currentColor" stroke-width="1.8" />
+              <path d="M14 4.5v4h4" stroke="currentColor" stroke-width="1.8" />
+            </svg>
+          </span>
+          ReadBox
+        </div>
+        <a class="gear" href="options.html" target="_blank" aria-label="打开设置">⌘</a>
       </header>
 
-      <section class="page-info">
+      <section class="popup-content">
+        <div class="page-label">当前页面</div>
         <div id="pageTitle" class="title">Loading...</div>
         <div id="pageUrl" class="url"></div>
-      </section>
 
-      <button id="saveButton" type="button">保存当前页面</button>
-      <div id="status" class="status" role="status"></div>
+        <button id="saveButton" class="action" type="button">保存当前页面</button>
+        <div id="status" class="status" role="status"></div>
+      </section>
     </main>
 
     <script src="readbox.js"></script>
