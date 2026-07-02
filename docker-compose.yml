@@ -1,11 +1,13 @@
 services:
   backend:
-    image: frayscc/readbox:backend-0.5.0
+    image: frayscc/readbox:backend-0.5.1
     container_name: readbox-backend
     environment:
-      READBOX_TOKEN: ${READBOX_TOKEN}
+      READBOX_USERNAME: ${READBOX_USERNAME:-readbox}
+      READBOX_PASSWORD: ${READBOX_PASSWORD:?set READBOX_PASSWORD in .env}
+      READBOX_SESSION_SECRET: ${READBOX_SESSION_SECRET:?set READBOX_SESSION_SECRET in .env}
       DATABASE_URL: sqlite:////data/readbox.db
-      CORS_ORIGINS: ${CORS_ORIGINS}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://readbox.example.com}
     volumes:
       - ./data:/data
     networks:
@@ -13,7 +15,7 @@ services:
     restart: unless-stopped
 
   web:
-    image: frayscc/readbox:web-0.5.0
+    image: frayscc/readbox:web-0.5.1
     container_name: readbox-web
     depends_on:
       - backend

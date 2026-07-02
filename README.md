@@ -4,7 +4,7 @@ ReadBox 是一个轻量级、自部署、单用户的稍后阅读收件箱。当
 
 ## 当前功能
 
-- FastAPI 后端，Bearer Token 鉴权
+- FastAPI 后端，单用户用户名密码登录，会话使用 Bearer Token 鉴权
 - SQLite 数据库存储，启动时开启 WAL
 - SQLite FTS5 搜索标题和正文
 - trafilatura + fallback 解析网页标题、正文、元信息和封面图
@@ -57,7 +57,7 @@ readbox/
 
 ```bash
 cp .env.example .env
-# 编辑 .env，把 READBOX_TOKEN 换成一个长随机字符串
+# 编辑 .env，设置 READBOX_USERNAME、READBOX_PASSWORD 和 READBOX_SESSION_SECRET
 docker compose up --build
 ```
 
@@ -70,7 +70,8 @@ docker compose up --build
 首次打开 Web 时填写：
 
 - API Base URL: `http://localhost:8000`
-- API Token: `.env` 里的 `READBOX_TOKEN`
+- 用户名: `.env` 里的 `READBOX_USERNAME`
+- 密码: `.env` 里的 `READBOX_PASSWORD`
 
 ## 本地开发
 
@@ -81,7 +82,7 @@ cd backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-READBOX_TOKEN=dev-token DATABASE_URL=sqlite:///../data/readbox.db uvicorn app.main:app --reload
+READBOX_USERNAME=readbox READBOX_PASSWORD=dev-password READBOX_SESSION_SECRET=dev-secret DATABASE_URL=sqlite:///../data/readbox.db uvicorn app.main:app --reload
 ```
 
 后端测试：
@@ -112,14 +113,14 @@ npm run dev
 2. 开启 Developer mode
 3. 点击 Load unpacked
 4. 选择本仓库的 `chrome-extension` 目录
-5. 打开插件 Options，填写 API Base URL 和 API Token
+5. 打开插件 Options，填写 API Base URL、用户名和密码
 
 保存入口：
 
 - 点击工具栏里的 ReadBox 图标，然后点击“保存当前页面”
 - 在网页或链接上右键，点击 “Save to ReadBox”
 
-插件会把当前页面的 `title` 和 `url` 发送到 `POST /api/items`，`source` 固定为 `chrome_extension`。如果未配置 API、Token 错误、网络失败或后端返回错误，popup 会显示对应提示；右键保存失败时会在扩展 service worker 控制台记录错误，并短暂显示 `ERR` badge。
+插件会把当前页面的 `title` 和 `url` 发送到 `POST /api/items`，`source` 固定为 `chrome_extension`。如果未配置 API、登录失效、网络失败或后端返回错误，popup 会显示对应提示；右键保存失败时会在扩展 service worker 控制台记录错误，并短暂显示 `ERR` badge。
 
 ## iOS App 和 Share Extension
 
@@ -131,7 +132,7 @@ iOS 源码位于 `ios/`，并包含可直接打开的 `ios/ReadBox.xcodeproj`：
 
 主 App 支持：
 
-- 设置 API Base URL 和 API Token
+- 使用 API Base URL、用户名和密码登录
 - 查看未读、已读、收藏列表
 - 打开阅读页
 - 标记已读 / 恢复未读
@@ -160,8 +161,13 @@ Share Extension 支持：
 ## API 示例
 
 ```bash
-TOKEN=dev-token
 API=http://localhost:8000
+TOKEN=$(
+  curl -s -X POST "$API/api/auth/login" \
+    -H "Content-Type: application/json" \
+    -d '{"username":"readbox","password":"dev-password"}' |
+  python3 -c 'import json,sys; print(json.load(sys.stdin)["access_token"])'
+)
 
 curl "$API/api/health"
 

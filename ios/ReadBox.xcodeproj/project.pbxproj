@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		00CFB06A9C7D38005503F0C8 /* ReadBoxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B19F2A1ED80EFF3FBC1ABD6E /* ReadBoxTheme.swift */; };
 		037E2402A113252397D0790A /* ReadBoxAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32BF75E5423B26E8EA488D99 /* ReadBoxAPIClient.swift */; };
+		20CD5AACD843044EA91EB160 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1F3B856BC0E604219867B04B /* LaunchScreen.storyboard */; };
 		24E0728ED4E24E28BD5A419D /* AddURLView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1AAC12A56B6D49D33B5818 /* AddURLView.swift */; };
 		29CC4C7CD46EED94CCE8C23E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BE2FB481BDCCD2D175A24849 /* Assets.xcassets */; };
 		3AE49742CC39E8FD205BA3BA /* ReadBoxShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = ECFB43F6D1B41EA2D2749194 /* ReadBoxShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -56,6 +57,7 @@
 		0ED7DE8CFA98A54B29E7DAF5 /* ReadBoxShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ReadBoxShareExtension.entitlements; sourceTree = "<group>"; };
 		0EFC1BBA1C94987345D8ADAE /* ReadBox.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ReadBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		11A3291CBA264A5BA6307856 /* ReadBoxModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadBoxModels.swift; sourceTree = "<group>"; };
+		1F3B856BC0E604219867B04B /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		31E35E614B154E02E7E37C2C /* ReadBoxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadBoxApp.swift; sourceTree = "<group>"; };
 		31E3CB2779CA947DC59F5ACF /* ShareExtensionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareExtensionView.swift; sourceTree = "<group>"; };
 		32BF75E5423B26E8EA488D99 /* ReadBoxAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadBoxAPIClient.swift; sourceTree = "<group>"; };
@@ -126,6 +128,7 @@
 				75C4AD550F4E794D79327E16 /* ContentView.swift */,
 				FEDC5A8640E6D1646414FEC0 /* Info.plist */,
 				B691E4C6294ED6D8308BE784 /* ItemListViewModel.swift */,
+				1F3B856BC0E604219867B04B /* LaunchScreen.storyboard */,
 				510B2951EBE75C398F126FB1 /* ReadBox.entitlements */,
 				31E35E614B154E02E7E37C2C /* ReadBoxApp.swift */,
 				7AFC079466A4642B5184C9AB /* ReaderView.swift */,
@@ -217,6 +220,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				29CC4C7CD46EED94CCE8C23E /* Assets.xcassets in Resources */,
+				20CD5AACD843044EA91EB160 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -372,7 +376,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.5.0;
+				MARKETING_VERSION = 0.5.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -431,7 +435,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.5.0;
+				MARKETING_VERSION = 0.5.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

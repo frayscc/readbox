@@ -27,6 +27,23 @@ final class ReadBoxAPIClient {
         self.session = session
     }
 
+    func login(apiBaseURL: String, username: String, password: String) async throws -> LoginResponse {
+        let normalizedBaseURL = ReadBoxSettings.normalizeBaseURL(apiBaseURL)
+        guard var components = URLComponents(string: normalizedBaseURL) else {
+            throw ReadBoxAPIError.invalidBaseURL
+        }
+        components.path = "/api/auth/login"
+        guard let url = components.url else {
+            throw ReadBoxAPIError.invalidBaseURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(LoginRequest(username: username, password: password))
+        return try await perform(request)
+    }
+
     func listItems(status: String = "unread", favorite: Bool? = nil) async throws -> [ReadBoxItem] {
         var query = [URLQueryItem(name: "status", value: status)]
         if let favorite {

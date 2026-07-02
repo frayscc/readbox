@@ -61,3 +61,19 @@ class ItemListResponse(BaseModel):
     items: list[ItemSummary]
     limit: int
     offset: int
+
+
+class LoginRequest(BaseModel):
+    username: str = Field(min_length=1, max_length=120)
+    password: str = Field(min_length=1, max_length=500)
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int
+    username: str
+
+
+class AuthMeResponse(BaseModel):
+    username: str

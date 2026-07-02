@@ -65,6 +65,37 @@ def test_api_requires_token(client: TestClient) -> None:
     assert response.status_code == 401
 
 
+def test_login_returns_bearer_token(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("READBOX_USERNAME", "alice")
+    monkeypatch.setenv("READBOX_PASSWORD", "correct horse battery staple")
+    monkeypatch.delenv("READBOX_TOKEN", raising=False)
+    monkeypatch.setattr(database, "DB_PATH", tmp_path / "readbox.db")
+
+    with TestClient(app) as test_client:
+        login_response = test_client.post(
+            "/api/auth/login",
+            json={"username": "alice", "password": "correct horse battery staple"},
+        )
+        assert login_response.status_code == 200
+
+        token = login_response.json()["access_token"]
+        response = test_client.get("/api/items", headers={"Authorization": f"Bearer {token}"})
+
+    assert response.status_code == 200
+
+
+def test_login_rejects_wrong_password(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("READBOX_USERNAME", "alice")
+    monkeypatch.setenv("READBOX_PASSWORD", "secret")
+
+    response = client.post(
+        "/api/auth/login",
+        json={"username": "alice", "password": "wrong"},
+    )
+
+    assert response.status_code == 401
+
+
 def test_search_api_handles_special_characters(client: TestClient) -> None:
     response = client.get('/api/search?q=" OR @@@', headers=auth_headers())
 

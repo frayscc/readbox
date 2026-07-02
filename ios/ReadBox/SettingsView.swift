@@ -3,7 +3,12 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var apiBaseURL = ReadBoxSettings.apiBaseURL
-    @State private var apiToken = ReadBoxSettings.apiToken
+    @State private var username = ReadBoxSettings.username
+    @State private var password = ""
+    @State private var message: String?
+    @State private var isSaving = false
+
+    private let apiClient = ReadBoxAPIClient()
 
     let onSave: () -> Void
 
@@ -33,23 +38,32 @@ struct SettingsView: View {
                                 .keyboardType(.URL)
                                 .textFieldStyle(ReadBoxTextFieldStyle())
 
-                            FieldLabel("API Token")
-                            SecureField("API Token", text: $apiToken)
+                            FieldLabel("用户名")
+                            TextField("readbox", text: $username)
+                                .textInputAutocapitalization(.never)
+                                .textFieldStyle(ReadBoxTextFieldStyle())
+
+                            FieldLabel("密码")
+                            SecureField("Password", text: $password)
                                 .textFieldStyle(ReadBoxTextFieldStyle())
                         }
                     }
 
-                    Text("这些信息只保存在本机。Chrome 插件和 Web 端需要分别配置。")
+                    if let message {
+                        Text(message)
+                            .font(.footnote)
+                            .foregroundStyle(ReadBoxTheme.danger)
+                    }
+
+                    Text("密码不会保存在本机。Chrome 插件和 Web 端需要分别登录。")
                         .font(.footnote)
                         .foregroundStyle(ReadBoxTheme.muted)
 
-                    Button("保存设置") {
-                        ReadBoxSettings.apiBaseURL = apiBaseURL
-                        ReadBoxSettings.apiToken = apiToken
-                        onSave()
-                        dismiss()
+                    Button(isSaving ? "正在登录..." : "登录并保存") {
+                        Task { await save() }
                     }
                     .buttonStyle(ReadBoxPrimaryButtonStyle())
+                    .disabled(isSaving)
 
                     Spacer()
                 }
@@ -64,5 +78,25 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    private func save() async {
+        isSaving = true
+        message = nil
+        do {
+            let session = try await apiClient.login(
+                apiBaseURL: apiBaseURL,
+                username: username,
+                password: password
+            )
+            ReadBoxSettings.apiBaseURL = apiBaseURL
+            ReadBoxSettings.username = session.username
+            ReadBoxSettings.apiToken = session.accessToken
+            onSave()
+            dismiss()
+        } catch {
+            message = error.localizedDescription
+        }
+        isSaving = false
     }
 }

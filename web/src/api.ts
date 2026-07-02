@@ -22,9 +22,17 @@ export type ReadBoxItem = {
 export type Settings = {
   apiBaseUrl: string;
   apiToken: string;
+  username?: string;
 };
 
 export type ListMode = "unread" | "read" | "favorite" | "search";
+
+export type LoginResponse = {
+  access_token: string;
+  token_type: "bearer";
+  expires_in: number;
+  username: string;
+};
 
 function normalizeBaseUrl(url: string): string {
   return url.replace(/\/+$/, "");
@@ -50,6 +58,27 @@ export async function request<T>(
   }
 
   return response.json() as Promise<T>;
+}
+
+export async function login(
+  apiBaseUrl: string,
+  username: string,
+  password: string
+): Promise<LoginResponse> {
+  const response = await fetch(`${normalizeBaseUrl(apiBaseUrl)}/api/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ username, password })
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || `Login failed: ${response.status}`);
+  }
+
+  return response.json() as Promise<LoginResponse>;
 }
 
 export async function listItems(

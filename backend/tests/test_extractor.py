@@ -7,6 +7,7 @@ from app.extractor import (
     find_title,
     make_excerpt,
     normalize_text,
+    text_to_html,
 )
 
 
@@ -76,3 +77,27 @@ def test_fallback_extract_prefers_article_content() -> None:
     assert "<h1>标题</h1>" in content_html
     assert content_text == "标题\n\n第一段中文内容。\n\n第二段中文内容。"
     assert "首页 导航" not in content_text
+
+
+def test_fallback_extract_handles_common_chinese_content_classes() -> None:
+    html = """
+    <html>
+      <body>
+        <div class="recommend">相关推荐 购买链接</div>
+        <div id="js_content">
+          <p>这是第一段正文，页面没有 article 标签。</p>
+          <p>这是第二段正文，应该作为纯文本保存。</p>
+        </div>
+      </body>
+    </html>
+    """
+
+    content_html, content_text = fallback_extract(html)
+
+    assert content_html is not None
+    assert content_text == "这是第一段正文，页面没有 article 标签。\n\n这是第二段正文，应该作为纯文本保存。"
+    assert "相关推荐" not in content_text
+
+
+def test_text_to_html_converts_plain_text_paragraphs() -> None:
+    assert text_to_html("第一段\n\n第二段") == "<p>第一段</p>\n<p>第二段</p>"

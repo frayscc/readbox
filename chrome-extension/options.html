@@ -18,7 +18,7 @@
           </span>
           <div>
             <h1>ReadBox Options</h1>
-            <p>Chrome 扩展只保存服务地址和令牌，不存储文章正文。</p>
+            <p>Chrome 扩展只保存服务地址和登录会话，不保存密码。</p>
           </div>
         </div>
 
@@ -28,8 +28,13 @@
         </label>
 
         <label>
-          API Token
-          <input id="apiToken" type="password" required />
+          用户名
+          <input id="username" type="text" autocomplete="username" required />
+        </label>
+
+        <label>
+          密码
+          <input id="password" type="password" autocomplete="current-password" required />
         </label>
 
         <div class="options-actions">

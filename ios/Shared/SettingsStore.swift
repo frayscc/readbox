@@ -4,6 +4,7 @@ enum ReadBoxSettings {
     static let appGroupID = "group.com.example.readbox"
     static let apiBaseURLKey = "apiBaseURL"
     static let apiTokenKey = "apiToken"
+    static let usernameKey = "username"
 
     static var defaults: UserDefaults {
         UserDefaults(suiteName: appGroupID) ?? .standard
@@ -17,6 +18,11 @@ enum ReadBoxSettings {
     static var apiToken: String {
         get { defaults.string(forKey: apiTokenKey) ?? "" }
         set { defaults.set(newValue.trimmingCharacters(in: .whitespacesAndNewlines), forKey: apiTokenKey) }
+    }
+
+    static var username: String {
+        get { defaults.string(forKey: usernameKey) ?? "readbox" }
+        set { defaults.set(newValue.trimmingCharacters(in: .whitespacesAndNewlines), forKey: usernameKey) }
     }
 
     static var isConfigured: Bool {

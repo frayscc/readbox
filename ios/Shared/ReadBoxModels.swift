@@ -67,3 +67,22 @@ struct UpdateItemRequest: Codable {
         case title
     }
 }
+
+struct LoginRequest: Codable {
+    let username: String
+    let password: String
+}
+
+struct LoginResponse: Codable {
+    let accessToken: String
+    let tokenType: String
+    let expiresIn: Int
+    let username: String
+
+    enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+        case tokenType = "token_type"
+        case expiresIn = "expires_in"
+        case username
+    }
+}

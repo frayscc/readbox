@@ -4,7 +4,7 @@ This folder contains the Swift source for the third-stage ReadBox iOS MVP:
 
 - A SwiftUI app for settings, unread/read/favorite lists, reading, favorite toggling, deleting, and manual URL saving.
 - A Share Extension that accepts `public.url` and `public.plain-text`, extracts the first HTTP(S) URL from text, and posts it to `POST /api/items` with `source = ios_share`.
-- Shared settings stored in App Group `UserDefaults` so the app and extension use the same API Base URL and token.
+- Shared settings stored in App Group `UserDefaults` so the app and extension use the same API Base URL and login session token.
 
 ## Xcode Setup
 
@@ -74,4 +74,4 @@ For plain HTTP during development, configure App Transport Security in Xcode if 
 4. Archive or build the app for your device.
 5. Use AltStore/AltServer with your signed IPA according to your normal sideloading flow.
 
-The source here intentionally avoids complex offline caching, background sync, account systems, annotation, and AI features. It only completes the ReadBox save/read/mark loop on iOS.
+The source here intentionally avoids complex offline caching, background sync, multi-user account systems, annotation, and AI features. It only completes the ReadBox save/read/mark loop on iOS.

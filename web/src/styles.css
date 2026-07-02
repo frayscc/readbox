@@ -210,6 +210,12 @@ button:disabled {
   padding: 11px 12px;
 }
 
+.message.error {
+  background: #fff2ee;
+  border: 1px solid #f1b5a7;
+  color: #8f2f1f;
+}
+
 .list {
   overflow: auto;
   padding: 8px;

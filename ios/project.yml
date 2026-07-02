@@ -4,7 +4,7 @@ options:
     iOS: "17.0"
 settings:
   base:
-    MARKETING_VERSION: 0.5.0
+    MARKETING_VERSION: 0.5.1
     CURRENT_PROJECT_VERSION: 1
 targets:
   ReadBox:
@@ -19,6 +19,7 @@ targets:
         CFBundleDisplayName: ReadBox
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchStoryboardName: LaunchScreen
     entitlements:
       path: ReadBox/ReadBox.entitlements
     settings:

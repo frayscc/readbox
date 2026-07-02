@@ -28,7 +28,7 @@ final class ItemListViewModel: ObservableObject {
     func load() async {
         guard ReadBoxSettings.isConfigured else {
             items = []
-            message = "请先在设置里配置服务地址和 Token。"
+            message = "请先在设置里登录 ReadBox 服务。"
             return
         }
 

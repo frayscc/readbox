@@ -7,6 +7,7 @@ import {
   getItem,
   ListMode,
   listItems,
+  login,
   ReadBoxItem,
   Settings,
   updateItem
@@ -18,9 +19,9 @@ const SETTINGS_KEY = "readbox.settings";
 function loadSettings(): Settings {
   try {
     const value = localStorage.getItem(SETTINGS_KEY);
-    return value ? JSON.parse(value) : { apiBaseUrl: "", apiToken: "" };
+    return value ? JSON.parse(value) : { apiBaseUrl: "", apiToken: "", username: "readbox" };
   } catch {
-    return { apiBaseUrl: "", apiToken: "" };
+    return { apiBaseUrl: "", apiToken: "", username: "readbox" };
   }
 }
 
@@ -55,12 +56,31 @@ function SettingsForm({
   onSave: (settings: Settings) => void;
   onCancel?: () => void;
 }) {
-  const [settings, setSettings] = useState<Settings>(loadSettings());
+  const saved = loadSettings();
+  const [apiBaseUrl, setApiBaseUrl] = useState(saved.apiBaseUrl);
+  const [username, setUsername] = useState(saved.username || "readbox");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function submit(event: FormEvent) {
+  async function submit(event: FormEvent) {
     event.preventDefault();
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-    onSave(settings);
+    setSubmitting(true);
+    setMessage("");
+    try {
+      const session = await login(apiBaseUrl, username, password);
+      const nextSettings = {
+        apiBaseUrl: apiBaseUrl.replace(/\/+$/, ""),
+        apiToken: session.access_token,
+        username: session.username
+      };
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(nextSettings));
+      onSave(nextSettings);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "登录失败");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -69,7 +89,7 @@ function SettingsForm({
         <BrandMark />
         <div>
           <h1 id="settings-title">服务设置</h1>
-          <p>填写自部署后端地址和访问令牌。信息仅保存在本机。</p>
+          <p>登录你的自部署 ReadBox 服务。密码不会保存在本机。</p>
         </div>
       </div>
 
@@ -77,25 +97,38 @@ function SettingsForm({
         API Base URL
         <input
           placeholder="https://readbox.example.com"
-          value={settings.apiBaseUrl}
-          onChange={(event) =>
-            setSettings({ ...settings, apiBaseUrl: event.target.value })
-          }
+          value={apiBaseUrl}
+          onChange={(event) => setApiBaseUrl(event.target.value)}
           required
         />
       </label>
 
       <label>
-        API Token
+        用户名
         <input
-          type="password"
-          value={settings.apiToken}
-          onChange={(event) =>
-            setSettings({ ...settings, apiToken: event.target.value })
-          }
+          value={username}
+          onChange={(event) => setUsername(event.target.value)}
+          autoComplete="username"
           required
         />
       </label>
+
+      <label>
+        密码
+        <input
+          type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          autoComplete="current-password"
+          required
+        />
+      </label>
+
+      {message && (
+        <div className="message error" role="alert">
+          {message}
+        </div>
+      )}
 
       <div className="settings-actions">
         {onCancel && (
@@ -103,8 +136,8 @@ function SettingsForm({
             取消
           </button>
         )}
-        <button className="primary" type="submit">
-          保存设置
+        <button className="primary" type="submit" disabled={submitting}>
+          {submitting ? "正在登录..." : "登录并保存"}
         </button>
       </div>
     </form>
@@ -208,6 +241,13 @@ function Reader({
     if (!item?.content_html) return "";
     return DOMPurify.sanitize(item.content_html);
   }, [item]);
+  const textParagraphs = useMemo(() => {
+    if (!item?.content_text) return [];
+    return item.content_text
+      .split(/\n{2,}/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean);
+  }, [item]);
 
   if (!item) {
     return (
@@ -285,6 +325,12 @@ function Reader({
           </div>
           {html ? (
             <div className="article-body" dangerouslySetInnerHTML={{ __html: html }} />
+          ) : textParagraphs.length ? (
+            <div className="article-body plain-text">
+              {textParagraphs.map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+            </div>
           ) : (
             <p className="fallback-text">
               暂无提取正文。可以打开原文链接阅读，保存记录已经保留。

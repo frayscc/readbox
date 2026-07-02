@@ -70,6 +70,8 @@ def extract_article(url: str) -> ArticleExtract:
             text = text or fallback_text
 
         text = normalize_text(text)
+        if text and not html:
+            html = text_to_html(text)
         excerpt = make_excerpt(text)
 
         metadata_title = getattr(metadata, "title", None) if metadata else None
@@ -165,7 +167,10 @@ def normalize_text(text: str | None) -> str | None:
     if not text:
         return None
     text = text.replace("\u3000", " ")
-    text = re.sub(rf"(?<=[{CJK_RE}])\s+(?=[{CJK_RE}])", "", text)
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = re.sub(r"\n[ \t]*\n+", "\n\n", text)
+    text = re.sub(rf"(?<=[{CJK_RE}])[ \t\f\v]*\n[ \t\f\v]*(?=[{CJK_RE}])", "", text)
+    text = re.sub(rf"(?<=[{CJK_RE}])[ \t\f\v]+(?=[{CJK_RE}])", "", text)
     text = re.sub(r"[ \t\r\f\v]+", " ", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip() or None
@@ -233,16 +238,29 @@ def fallback_extract(html: str) -> tuple[str | None, str | None]:
         from lxml import html as lxml_html
 
         document = lxml_html.fromstring(html)
+        lower_attrs = (
+            "translate(concat(@class, ' ', @id), "
+            "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
+        )
         for node in document.xpath(
             "//script|//style|//noscript|//template|//svg|//canvas|//iframe|"
-            "//nav|//header|//footer|//*[contains(@class, 'comment') or contains(@id, 'comment')]"
+            "//nav|//header|//footer|//aside|//form|"
+            f"//*[contains({lower_attrs}, 'comment') or contains({lower_attrs}, 'nav') or "
+            f"contains({lower_attrs}, 'footer') or contains({lower_attrs}, 'sidebar') or "
+            f"contains({lower_attrs}, 'related') or contains({lower_attrs}, 'recommend')]"
         ):
             parent = node.getparent()
             if parent is not None:
                 parent.remove(node)
 
-        candidates = document.xpath("//article|//main|//*[@id='article' or @id='content' or contains(@class, 'article') or contains(@class, 'content')]")
-        candidate = max(candidates, key=lambda node: len(node.text_content()), default=document)
+        candidates = document.xpath(
+            "//article|//main|"
+            f"//*[contains({lower_attrs}, 'article') or contains({lower_attrs}, 'content') or "
+            f"contains({lower_attrs}, 'post') or contains({lower_attrs}, 'entry') or "
+            f"contains({lower_attrs}, 'body') or contains({lower_attrs}, 'text') or "
+            f"contains({lower_attrs}, 'rich_media_content') or contains({lower_attrs}, 'js_content')]"
+        )
+        candidate = max(candidates, key=content_score, default=document)
 
         blocks: list[str] = []
         text_blocks: list[str] = []
@@ -258,11 +276,29 @@ def fallback_extract(html: str) -> tuple[str | None, str | None]:
 
         if not text_blocks:
             text = normalize_text(candidate.text_content())
-            return (f"<p>{escape(text)}</p>" if text else None, text)
+            return (text_to_html(text) if text else None, text)
 
         return "\n".join(blocks), "\n\n".join(text_blocks)
     except Exception:
         return None, None
+
+
+def content_score(node) -> int:
+    text = normalize_text(node.text_content()) or ""
+    cjk_count = len(re.findall(rf"[{CJK_RE}]", text))
+    paragraph_count = len(node.xpath(".//p|.//li|.//blockquote|.//pre"))
+    link_text = " ".join(link.text_content() for link in node.xpath(".//a"))
+    return len(text) + cjk_count * 2 + paragraph_count * 80 - len(link_text) * 2
+
+
+def text_to_html(text: str | None) -> str | None:
+    text = normalize_text(text)
+    if not text:
+        return None
+    paragraphs = [part.strip() for part in re.split(r"\n{2,}", text) if part.strip()]
+    if not paragraphs:
+        return None
+    return "\n".join(f"<p>{escape(paragraph)}</p>" for paragraph in paragraphs)
 
 
 def dedupe(values: Iterable[str | None]) -> list[str | None]:
